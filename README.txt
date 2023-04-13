@@ -28,7 +28,8 @@ By Anthony Kleine
 	the Score, or the First Frame for Film Loops. For other MOA Properties, this
 	option is ignored.
 
-	If a property in the options property list is void, or left unspecified, the default for that option is used.
+	If a property in the options property list is void, or left unspecified, the default
+	for that option is used.
 
 	Works with all Director versions from 5 - 12.
 
