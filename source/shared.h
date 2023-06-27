@@ -21,13 +21,15 @@ inline bool memoryEqual(const void* buffer, const void* buffer2, size_t bufferSi
 	return !memcmp(buffer, buffer2, bufferSize);
 }
 
-inline bool memoryShift(size_t bufferSize, void* buffer, size_t sourceSize, void* source, size_t shift, bool direction) {
-	if (source < buffer || (char*)source + sourceSize > (char*)buffer + bufferSize) {
+inline bool memoryShift(size_t bufferSize, void *buffer, size_t sourceSize, void *source, size_t shift, bool direction) {
+	#pragma warning(push)
+	#pragma warning(disable : 4133)
+	if (source < buffer || (char *)source + sourceSize > (char *)buffer + bufferSize) {
 		return false;
 	}
 
-	size_t destinationSize = (char*)buffer + bufferSize - source;
-	char* destination = (char*)source;
+	size_t destinationSize = (char *)buffer + bufferSize - source;
+	char *destination = (char *)source;
 
 	if (direction) {
 		destination += shift;
@@ -35,8 +37,9 @@ inline bool memoryShift(size_t bufferSize, void* buffer, size_t sourceSize, void
 		destination -= shift;
 	}
 
-	if (destination < buffer || destination + destinationSize > (char*)buffer + bufferSize) {
+	if (destination < buffer || destination + destinationSize > (char *)buffer + bufferSize) {
 		return false;
 	}
 	return !memmove_s(destination, destinationSize, source, sourceSize);
+	#pragma warning(pop)
 }

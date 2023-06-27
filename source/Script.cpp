@@ -150,9 +150,16 @@ STDMETHODIMP_(MoaError) MoaCreate_TStdXtra(TStdXtra* This) {
 	ThrowNull(This);
 
 	ThrowErr(This->pCallback->QueryInterface(&IID_IMoaDrPlayer, (PPMoaVoid)&This->drPlayerInterfacePointer));
+	ThrowNull(This->drPlayerInterfacePointer);
+
 	ThrowErr(This->pCallback->QueryInterface(&IID_IMoaMmValue, (PPMoaVoid)&This->mmValueInterfacePointer));
+	ThrowNull(This->mmValueInterfacePointer);
+
 	ThrowErr(This->pCallback->QueryInterface(&IID_IMoaDrValue, (PPMoaVoid)&This->drValueInterfacePointer));
+	ThrowNull(This->drValueInterfacePointer);
+
 	ThrowErr(This->pCallback->QueryInterface(&IID_IMoaMmList, (PPMoaVoid)&This->mmListInterfacePointer));
+	ThrowNull(This->mmListInterfacePointer);
 
 	moa_catch
 	moa_catch_end
@@ -215,6 +222,8 @@ END_DEFINE_CLASS_INTERFACE
 // pointers that we can point to data
 // that will tell Director what this Xtra does
 STDMETHODIMP TStdXtra_IMoaRegister::Register(PIMoaCache cacheInterfacePointer, PIMoaXtraEntryDict xtraEntryDictInterfacePointer) {
+	PMoaVoid memStrPointer = NULL;
+
 	moa_try
 
 	ThrowNull(cacheInterfacePointer);
@@ -223,11 +232,12 @@ STDMETHODIMP TStdXtra_IMoaRegister::Register(PIMoaCache cacheInterfacePointer, P
 	// register the Lingo Xtra
 	PIMoaRegistryEntryDict registryEntryDictInterfacePointer = NULL;
 	ThrowErr(cacheInterfacePointer->AddRegistryEntry(xtraEntryDictInterfacePointer, &CLSID_TStdXtra, &IID_IMoaMmXScript, &registryEntryDictInterfacePointer));
+	ThrowNull(registryEntryDictInterfacePointer);
 
 	// register the Method Table
 	const char* VER_MAJORVERSION_STRING = "1";
 	const char* VER_MINORVERSION_STRING = "0";
-	const char* VER_BUGFIXVERSION_STRING = "0";
+	const char* VER_BUGFIXVERSION_STRING = "1";
 
 	const size_t VERSION_STR_SIZE = 256;
 	char versionStr[VERSION_STR_SIZE] = "";
@@ -236,7 +246,7 @@ STDMETHODIMP TStdXtra_IMoaRegister::Register(PIMoaCache cacheInterfacePointer, P
 		Throw(kMoaErr_OutOfMem);
 	}
 
-	PMoaVoid memStrPointer = pObj->pCalloc->NRAlloc(strlen(versionStr) + stringSize(msgTable));
+	memStrPointer = pObj->pCalloc->NRAlloc(strlen(versionStr) + stringSize(msgTable));
 	ThrowNull(memStrPointer);
 
 	if (strcpy_s((char*)memStrPointer, stringSize(versionStr), versionStr)) {
@@ -354,11 +364,12 @@ STDMETHODIMP TStdXtra_IMoaMmXScript::Call(PMoaDrCallInfo callPtr) {
 // the Register method implemented by
 // the IMoaRegister interface
 MoaError TStdXtra_IMoaMmXScript::XScrpAccessPlayerMoaProperty(PMoaDrCallInfo callPtr, PROPERTY_GET_OR_SET propertyGetOrSet) {
+	MoaMmValue argumentValue = kVoidMoaMmValueInitializer;
+
 	moa_try
 
 	ThrowNull(callPtr);
 
-	MoaMmValue argumentValue = kVoidMoaMmValueInitializer;
 	AccessArgByIndex(1, &argumentValue);
 
 	MoaMmSymbol nameSymbol = 0;
@@ -382,18 +393,18 @@ MoaError TStdXtra_IMoaMmXScript::XScrpAccessPlayerMoaProperty(PMoaDrCallInfo cal
 MoaError TStdXtra_IMoaMmXScript::XScrpAccessMovieMoaProperty(PMoaDrCallInfo callPtr, PROPERTY_GET_OR_SET propertyGetOrSet) {
 	PIMoaDrMovie drMovieInterfacePointer = NULL;
 
+	MoaMmValue argumentValue = kVoidMoaMmValueInitializer;
+
 	moa_try
 
 	ThrowNull(callPtr);
 
-	MoaMmValue argumentValue = kVoidMoaMmValueInitializer;
 	AccessArgByIndex(1, &argumentValue);
 
 	MoaMmSymbol nameSymbol = 0;
 	ThrowErr(pObj->mmValueInterfacePointer->ValueToSymbol(&argumentValue, &nameSymbol));
 
 	ThrowErr(XScrpGetOptions(callPtr, propertyGetOrSet, 2, &drMovieInterfacePointer, NULL));
-
 	ThrowNull(drMovieInterfacePointer);
 
 	switch (propertyGetOrSet) {
@@ -421,14 +432,15 @@ MoaError TStdXtra_IMoaMmXScript::XScrpAccessCastLibMoaProperty(PMoaDrCallInfo ca
 	PIMoaDrMovie drMovieInterfacePointer = NULL;
 	PIMoaDrCast drCastInterfacePointer = NULL;
 
+	MoaMmValue argumentValue = kVoidMoaMmValueInitializer;
+	MoaDrCastLibRef castLibRef = {};
+
 	moa_try
 
 	ThrowNull(callPtr);
 
-	MoaMmValue argumentValue = kVoidMoaMmValueInitializer;
 	AccessArgByIndex(1, &argumentValue);
 
-	MoaDrCastLibRef castLibRef = {};
 	ThrowErr(pObj->drValueInterfacePointer->ValueToCastLibRef(&argumentValue, &castLibRef));
 
 	AccessArgByIndex(2, &argumentValue);
@@ -437,13 +449,11 @@ MoaError TStdXtra_IMoaMmXScript::XScrpAccessCastLibMoaProperty(PMoaDrCallInfo ca
 	ThrowErr(pObj->mmValueInterfacePointer->ValueToSymbol(&argumentValue, &nameSymbol));
 
 	ThrowErr(XScrpGetOptions(callPtr, propertyGetOrSet, 3, &drMovieInterfacePointer, NULL));
-
 	ThrowNull(drMovieInterfacePointer);
 
 	// a castLibRef by itself does not reference a particular movie, so
 	// we need to pass it through the movie interface to get the actual cast interface
-	drMovieInterfacePointer->GetNthCast(CastLibRef_GetCastLibIndex(&castLibRef), &drCastInterfacePointer);
-
+	ThrowErr(drMovieInterfacePointer->GetNthCast(CastLibRef_GetCastLibIndex(&castLibRef), &drCastInterfacePointer));
 	ThrowNull(drCastInterfacePointer);
 
 	switch (propertyGetOrSet) {
@@ -476,14 +486,15 @@ MoaError TStdXtra_IMoaMmXScript::XScrpAccessMemberMoaProperty(PMoaDrCallInfo cal
 	PIMoaDrMovie drMovieInterfacePointer = NULL;
 	PIMoaDrCastMem drCastMemInterfacePointer = NULL;
 
+	MoaMmValue argumentValue = kVoidMoaMmValueInitializer;
+	MoaDrCMRef cmRef = {};
+
 	moa_try
 
 	ThrowNull(callPtr);
 
-	MoaMmValue argumentValue = kVoidMoaMmValueInitializer;
 	AccessArgByIndex(1, &argumentValue);
 
-	MoaDrCMRef cmRef = {};
 	ThrowErr(pObj->drValueInterfacePointer->ValueToCMRef(&argumentValue, &cmRef));
 
 	AccessArgByIndex(2, &argumentValue);
@@ -492,11 +503,9 @@ MoaError TStdXtra_IMoaMmXScript::XScrpAccessMemberMoaProperty(PMoaDrCallInfo cal
 	ThrowErr(pObj->mmValueInterfacePointer->ValueToSymbol(&argumentValue, &nameSymbol));
 
 	ThrowErr(XScrpGetOptions(callPtr, propertyGetOrSet, 3, &drMovieInterfacePointer, NULL));
-
 	ThrowNull(drMovieInterfacePointer);
 
-	drMovieInterfacePointer->GetCastMemFromCMRef(&cmRef, &drCastMemInterfacePointer);
-
+	ThrowErr(drMovieInterfacePointer->GetCastMemFromCMRef(&cmRef, &drCastMemInterfacePointer));
 	ThrowNull(drCastMemInterfacePointer);
 
 	switch (propertyGetOrSet) {
@@ -529,18 +538,18 @@ MoaError TStdXtra_IMoaMmXScript::XScrpAccessFrameMoaProperty(PMoaDrCallInfo call
 	PIMoaDrScoreAccess drScoreAccessInterfacePointer = NULL;
 	PIMoaDrScoreFrame drScoreFrameInterfacePointer = NULL;
 
+	MoaMmValue argumentValue = kVoidMoaMmValueInitializer;
+
 	moa_try
 
 	ThrowNull(callPtr);
 
-	MoaMmValue argumentValue = kVoidMoaMmValueInitializer;
 	AccessArgByIndex(1, &argumentValue);
 
 	MoaMmSymbol nameSymbol = 0;
 	ThrowErr(pObj->mmValueInterfacePointer->ValueToSymbol(&argumentValue, &nameSymbol));
 
 	ThrowErr(XScrpGetOptions(callPtr, propertyGetOrSet, 2, NULL, &drScoreAccessInterfacePointer));
-
 	ThrowNull(drScoreAccessInterfacePointer);
 
 	ThrowErr(drScoreAccessInterfacePointer->GetFrame(&drScoreFrameInterfacePointer));
@@ -592,7 +601,6 @@ MoaError TStdXtra_IMoaMmXScript::XScrpAccessSoundMoaProperty(PMoaDrCallInfo call
 	MoaLong channelIndex = 0;
 	MoaMmSymbol nameSymbol = 0;
 	ThrowErr(XScrpGetChannelMoaPropertyArguments(callPtr, propertyGetOrSet, &channelIndex, &nameSymbol, &drScoreAccessInterfacePointer));
-
 	ThrowNull(drScoreAccessInterfacePointer);
 
 	ThrowErr(drScoreAccessInterfacePointer->GetSound(channelIndex, &drScoreSoundInterfacePointer));
@@ -641,7 +649,6 @@ MoaError TStdXtra_IMoaMmXScript::XScrpAccessSpriteMoaProperty(PMoaDrCallInfo cal
 	MoaLong channelIndex = 0;
 	MoaMmSymbol nameSymbol = 0;
 	ThrowErr(XScrpGetChannelMoaPropertyArguments(callPtr, propertyGetOrSet, &channelIndex, &nameSymbol, &drScoreAccessInterfacePointer));
-
 	ThrowNull(drScoreAccessInterfacePointer);
 
 	ThrowErr(drScoreAccessInterfacePointer->GetSprite(channelIndex, &drScoreSpriteInterfacePointer));
@@ -742,6 +749,7 @@ MoaError TStdXtra_IMoaMmXScript::XScrpGetOptions(PMoaDrCallInfo callPtr, PROPERT
 	PIMoaDrMovie drMovieInterfacePointer = NULL;
 	PIMoaDrCastMem filmLoopCastMemInterfacePointer = NULL;
 
+	MoaMmValue argumentValue = kVoidMoaMmValueInitializer;
 	MoaMmValue movieValue = kVoidMoaMmValueInitializer;
 	MoaMmValue filmLoopValue = kVoidMoaMmValueInitializer;
 	MoaMmValue frameValue = kVoidMoaMmValueInitializer;
@@ -754,8 +762,6 @@ MoaError TStdXtra_IMoaMmXScript::XScrpGetOptions(PMoaDrCallInfo callPtr, PROPERT
 	if (!drMovieInterfacePointerPointer && !drScoreAccessInterfacePointerPointer) {
 		Throw(kMoaErr_OutOfMem);
 	}
-
-	MoaMmValue argumentValue = kVoidMoaMmValueInitializer;
 
 	bool optionsValueVoid = true;
 
@@ -810,7 +816,6 @@ MoaError TStdXtra_IMoaMmXScript::XScrpGetOptions(PMoaDrCallInfo callPtr, PROPERT
 			MoaDrCMRef filmLoopCMRef = {};
 			ThrowErr(pObj->drValueInterfacePointer->ValueToCMRef(&filmLoopValue, &filmLoopCMRef));
 			ThrowErr(drMovieInterfacePointer->GetCastMemFromCMRef(&filmLoopCMRef, &filmLoopCastMemInterfacePointer));
-
 			ThrowNull(filmLoopCastMemInterfacePointer);
 
 			ThrowErr(filmLoopCastMemInterfacePointer->GetScoreAccess(&drScoreAccessInterfacePointer));
@@ -849,7 +854,7 @@ MoaError TStdXtra_IMoaMmXScript::XScrpGetOptions(PMoaDrCallInfo callPtr, PROPERT
 		}
 
 		// the frame is not set by default, so we must always explicitly specify it
-		drScoreAccessInterfacePointer->SetCurFrameIndex(frameIndex);
+		ThrowErr(drScoreAccessInterfacePointer->SetCurFrameIndex(frameIndex));
 
 		*drScoreAccessInterfacePointerPointer = drScoreAccessInterfacePointer;
 	}
@@ -891,6 +896,8 @@ MoaError TStdXtra_IMoaMmXScript::XScrpGetOptions(PMoaDrCallInfo callPtr, PROPERT
 }
 
 MoaError TStdXtra_IMoaMmXScript::XScrpGetChannelMoaPropertyArguments(PMoaDrCallInfo callPtr, PROPERTY_GET_OR_SET propertyGetOrSet, PMoaLong channelIndexPointer, PMoaMmSymbol nameSymbolPointer, PIMoaDrScoreAccess* drScoreAccessInterfacePointerPointer) {
+	MoaMmValue argumentValue = kVoidMoaMmValueInitializer;
+
 	moa_try
 
 	ThrowNull(callPtr);
@@ -899,7 +906,6 @@ MoaError TStdXtra_IMoaMmXScript::XScrpGetChannelMoaPropertyArguments(PMoaDrCallI
 	ThrowNull(drScoreAccessInterfacePointerPointer);
 
 	// get the arguments for methods that take in a channel index
-	MoaMmValue argumentValue = kVoidMoaMmValueInitializer;
 	AccessArgByIndex(1, &argumentValue);
 
 	ThrowErr(pObj->mmValueInterfacePointer->ValueToInteger(&argumentValue, channelIndexPointer));
@@ -910,7 +916,6 @@ MoaError TStdXtra_IMoaMmXScript::XScrpGetChannelMoaPropertyArguments(PMoaDrCallI
 	ThrowErr(pObj->mmValueInterfacePointer->ValueToSymbol(&argumentValue, nameSymbolPointer));
 
 	ThrowErr(XScrpGetOptions(callPtr, propertyGetOrSet, 3, NULL, drScoreAccessInterfacePointerPointer));
-
 	ThrowNull(*drScoreAccessInterfacePointerPointer);
 
 	moa_catch
