@@ -2,10 +2,9 @@ MoaProperties Xtra 1.0.2
 By Anthony Kleine
 
 	This Director Xtra exposes MOA Properties to Lingo.
-	There are several advantages to using MOA Properties:
+	There are a couple advantages to using MOA Properties:
 
 	-dynamic property names: access properties by passing in symbols
-	-avoid script errors: don't get alerts if you access a property that doesn't exist
 	-unique properties: there are MOA Properties that can't be accessed with Lingo alone
 
 	Note that not every property that can be accessed with Lingo is possible
