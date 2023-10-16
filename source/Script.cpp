@@ -690,7 +690,6 @@ MoaError TStdXtra_IMoaMmXScript::XScrpTestValue(PMoaMmValue testValuePointer, Mo
 	moa_try
 
 	ThrowNull(testValuePointer);
-	ThrowNull(testValueType);
 	ThrowNull(testValueVoidPointer);
 
 	MoaMmValueType valueType = kMoaMmValueType_Void;
