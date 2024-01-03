@@ -237,7 +237,7 @@ STDMETHODIMP TStdXtra_IMoaRegister::Register(PIMoaCache cacheInterfacePointer, P
 	// register the Method Table
 	const char* VER_MAJORVERSION_STRING = "1";
 	const char* VER_MINORVERSION_STRING = "0";
-	const char* VER_BUGFIXVERSION_STRING = "2";
+	const char* VER_BUGFIXVERSION_STRING = "3";
 
 	const size_t VERSION_STR_SIZE = 256;
 	char versionStr[VERSION_STR_SIZE] = "";
