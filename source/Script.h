@@ -25,9 +25,9 @@ written permission of Adobe.
 
 
 
-enum PROPERTY_GET_OR_SET {
-	PROPERTY_GET_OR_SET_G = 0,
-	PROPERTY_GET_OR_SET_S = 1
+enum ACCESS_PROPERTY {
+	ACCESS_PROPERTY_G = 0,
+	ACCESS_PROPERTY_S = 1
 };
 
 
@@ -51,17 +51,17 @@ EXTERN_END_DEFINE_CLASS_INTERFACE
 EXTERN_BEGIN_DEFINE_CLASS_INTERFACE(TStdXtra, IMoaMmXScript)
 	EXTERN_DEFINE_METHOD(MoaError, Call, (PMoaDrCallInfo))
 	private:
-	EXTERN_DEFINE_METHOD(MoaError, XScrpAccessPlayerMoaProperty, (PMoaDrCallInfo, PROPERTY_GET_OR_SET))
-	EXTERN_DEFINE_METHOD(MoaError, XScrpAccessMovieMoaProperty, (PMoaDrCallInfo, PROPERTY_GET_OR_SET))
-	EXTERN_DEFINE_METHOD(MoaError, XScrpAccessCastLibMoaProperty, (PMoaDrCallInfo, PROPERTY_GET_OR_SET))
-	EXTERN_DEFINE_METHOD(MoaError, XScrpAccessMemberMoaProperty, (PMoaDrCallInfo, PROPERTY_GET_OR_SET))
-	EXTERN_DEFINE_METHOD(MoaError, XScrpAccessFrameMoaProperty, (PMoaDrCallInfo, PROPERTY_GET_OR_SET))
-	EXTERN_DEFINE_METHOD(MoaError, XScrpAccessSoundMoaProperty, (PMoaDrCallInfo, PROPERTY_GET_OR_SET))
-	EXTERN_DEFINE_METHOD(MoaError, XScrpAccessSpriteMoaProperty, (PMoaDrCallInfo, PROPERTY_GET_OR_SET))
-	EXTERN_DEFINE_METHOD(MoaError, XScrpTestValue, (PMoaMmValue, MoaMmValueType, bool*))
-	EXTERN_DEFINE_METHOD(MoaError, XScrpGetAProp, (ConstPMoaMmValue, ConstPMoaChar, PMoaMmValue))
-	EXTERN_DEFINE_METHOD(MoaError, XScrpGetOptions, (PMoaDrCallInfo, PROPERTY_GET_OR_SET, MoaLong, PIMoaDrMovie*, PIMoaDrScoreAccess*))
-	EXTERN_DEFINE_METHOD(MoaError, XScrpGetChannelMoaPropertyArguments, (PMoaDrCallInfo, PROPERTY_GET_OR_SET, PMoaLong, PMoaMmSymbol, PIMoaDrScoreAccess*))
+	EXTERN_DEFINE_METHOD(MoaError, AccessPlayerMoaProperty, (PMoaDrCallInfo, ACCESS_PROPERTY))
+	EXTERN_DEFINE_METHOD(MoaError, AccessMovieMoaProperty, (PMoaDrCallInfo, ACCESS_PROPERTY))
+	EXTERN_DEFINE_METHOD(MoaError, AccessCastLibMoaProperty, (PMoaDrCallInfo, ACCESS_PROPERTY))
+	EXTERN_DEFINE_METHOD(MoaError, AccessMemberMoaProperty, (PMoaDrCallInfo, ACCESS_PROPERTY))
+	EXTERN_DEFINE_METHOD(MoaError, AccessFrameMoaProperty, (PMoaDrCallInfo, ACCESS_PROPERTY))
+	EXTERN_DEFINE_METHOD(MoaError, AccessSoundMoaProperty, (PMoaDrCallInfo, ACCESS_PROPERTY))
+	EXTERN_DEFINE_METHOD(MoaError, AccessSpriteMoaProperty, (PMoaDrCallInfo, ACCESS_PROPERTY))
+	EXTERN_DEFINE_METHOD(MoaError, TestValue, (PMoaMmValue, MoaMmValueType, bool*))
+	EXTERN_DEFINE_METHOD(MoaError, GetAProp, (ConstPMoaMmValue, ConstPMoaChar, PMoaMmValue))
+	EXTERN_DEFINE_METHOD(MoaError, GetOptions, (PMoaDrCallInfo, ACCESS_PROPERTY, MoaLong, PIMoaDrMovie*, PIMoaDrScoreAccess*))
+	EXTERN_DEFINE_METHOD(MoaError, GetChannelMoaPropertyArguments, (PMoaDrCallInfo, ACCESS_PROPERTY, PMoaLong, PMoaMmSymbol, PIMoaDrScoreAccess*))
 EXTERN_END_DEFINE_CLASS_INTERFACE
 
 #endif
