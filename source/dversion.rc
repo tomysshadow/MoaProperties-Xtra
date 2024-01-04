@@ -34,7 +34,7 @@ BEGIN
             VALUE "FileDescription", "MoaProperties Xtra"
             VALUE "FileVersion", "1.0.3.0"
             VALUE "InternalName", "MoaProperties"
-            VALUE "LegalCopyright", "Copyright © Anthony Kleine 2023"
+            VALUE "LegalCopyright", "Copyright © Anthony Kleine 2024"
             VALUE "OriginalFilename", "MoaProperties.x32"
             VALUE "ProductName", "MoaProperties"
             VALUE "ProductVersion", "1.0.3.0"
