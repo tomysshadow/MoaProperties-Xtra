@@ -26,8 +26,8 @@ written permission of Adobe.
 
 
 enum ACCESS_PROPERTY {
-	ACCESS_PROPERTY_G = 0,
-	ACCESS_PROPERTY_S = 1
+	ACCESS_PROPERTY_GET = 0,
+	ACCESS_PROPERTY_SET = 1
 };
 
 
