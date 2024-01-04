@@ -686,21 +686,16 @@ MoaError TStdXtra_IMoaMmXScript::AccessSpriteMoaProperty(PMoaDrCallInfo callPtr,
 	moa_try_end
 }
 
-MoaError TStdXtra_IMoaMmXScript::TestValue(PMoaMmValue testValuePointer, MoaMmValueType testValueType, bool* testValueVoidPointer) {
+MoaError TStdXtra_IMoaMmXScript::TestValueDefault(PMoaMmValue testValuePointer, bool* testValueDefaultPointer) {
 	moa_try
 
 	ThrowNull(testValuePointer);
-	ThrowNull(testValueVoidPointer);
+	ThrowNull(testValueDefaultPointer);
 
 	MoaMmValueType valueType = kMoaMmValueType_Void;
 	ThrowErr(pObj->mmValueInterfacePointer->ValueType(testValuePointer, &valueType));
 
-	bool &testValueVoid = *testValueVoidPointer;
-	testValueVoid = valueType == kMoaMmValueType_Void;
-
-	if (!testValueVoid && valueType != testValueType) {
-		Throw(kMoaErr_BadParam);
-	}
+	*testValueDefaultPointer = valueType == kMoaMmValueType_Void;
 
 	moa_catch
 	moa_catch_end
@@ -758,7 +753,7 @@ MoaError TStdXtra_IMoaMmXScript::GetOptions(PMoaDrCallInfo callPtr, ACCESS_PROPE
 		Throw(kMoaErr_OutOfMem);
 	}
 
-	bool optionsValueVoid = true;
+	bool optionsValueDefault = true;
 
 	optionsArgumentIndex += accessProperty;
 
@@ -766,19 +761,19 @@ MoaError TStdXtra_IMoaMmXScript::GetOptions(PMoaDrCallInfo callPtr, ACCESS_PROPE
 	if (callPtr->nargs >= optionsArgumentIndex) {
 		// if the optional argument is a property list
 		AccessArgByIndex(optionsArgumentIndex, &argumentValue);
-		ThrowErr(TestValue(&argumentValue, kMoaMmValueType_PropList, &optionsValueVoid));
+		ThrowErr(TestValueDefault(&argumentValue, &optionsValueDefault));
 	}
 
-	bool movieValueVoid = true;
+	bool movieValueDefault = true;
 
-	if (!optionsValueVoid) {
+	if (!optionsValueDefault) {
 		// first, try and get the #movie property from the options property list
 		// and test it's an integer
 		ThrowErr(GetAProp(&argumentValue, "Movie", &movieValue));
-		ThrowErr(TestValue(&movieValue, kMoaMmValueType_Integer, &movieValueVoid));
+		ThrowErr(TestValueDefault(&movieValue, &movieValueDefault));
 	}
 
-	if (movieValueVoid) {
+	if (movieValueDefault) {
 		// if the #movie property is void, use the active movie
 		ThrowErr(pObj->drPlayerInterfacePointer->GetActiveMovie(&drMovieInterfacePointer));
 	} else {
@@ -792,18 +787,18 @@ MoaError TStdXtra_IMoaMmXScript::GetOptions(PMoaDrCallInfo callPtr, ACCESS_PROPE
 	ThrowNull(drMovieInterfacePointer);
 
 	if (drScoreAccessInterfacePointerPointer) {
-		bool filmLoopValueVoid = true;
+		bool filmLoopValueDefault = true;
 
-		if (!optionsValueVoid) {
+		if (!optionsValueDefault) {
 			// first, try and get the #filmLoop property from the options property list
 			// and test it's a member
 			ThrowErr(GetAProp(&argumentValue, "FilmLoop", &filmLoopValue));
-			ThrowErr(TestValue(&filmLoopValue, kMoaMmValueType_Member, &filmLoopValueVoid));
+			ThrowErr(TestValueDefault(&filmLoopValue, &filmLoopValueDefault));
 		}
 
 		PIMoaDrScoreAccess drScoreAccessInterfacePointer = NULL;
 
-		if (filmLoopValueVoid) {
+		if (filmLoopValueDefault) {
 			// if the #filmLoop property is void, use the score
 			ThrowErr(drMovieInterfacePointer->GetScoreAccess(&drScoreAccessInterfacePointer));
 		} else {
@@ -818,20 +813,20 @@ MoaError TStdXtra_IMoaMmXScript::GetOptions(PMoaDrCallInfo callPtr, ACCESS_PROPE
 
 		ThrowNull(drScoreAccessInterfacePointer);
 
-		bool frameValueVoid = true;
+		bool frameValueDefault = true;
 
-		if (!optionsValueVoid) {
+		if (!optionsValueDefault) {
 			// first, try and get the #frame property from the options property list
 			// and test it's an integer
 			ThrowErr(GetAProp(&argumentValue, "Frame", &frameValue));
-			ThrowErr(TestValue(&frameValue, kMoaMmValueType_Integer, &frameValueVoid));
+			ThrowErr(TestValueDefault(&frameValue, &frameValueDefault));
 		}
 
 		MoaLong frameIndex = 0;
 
-		if (frameValueVoid) {
+		if (frameValueDefault) {
 			// if the #frame property is void
-			if (filmLoopValueVoid) {
+			if (filmLoopValueDefault) {
 				// for the score, default to the frame property of the movie
 				MoaMmSymbol frameSymbol = 0;
 				ThrowErr(pObj->mmValueInterfacePointer->StringToSymbol("Frame", &frameSymbol));
