@@ -213,59 +213,55 @@ STD_INTERFACE_CREATE_DESTROY(TStdXtra, IMoaRegister)
 BEGIN_DEFINE_CLASS_INTERFACE(TStdXtra, IMoaRegister)
 END_DEFINE_CLASS_INTERFACE
 
-// the IMoaRegister interface is expected
-// to implement a method called Register which
-// will be called by Director after it Queries for
-// this interface
-// Director will call this method and
-// pass in the arguments for it, which are
-// pointers that we can point to data
-// that will tell Director what this Xtra does
 STDMETHODIMP TStdXtra_IMoaRegister::Register(PIMoaCache cacheInterfacePointer, PIMoaXtraEntryDict xtraEntryDictInterfacePointer) {
-	PMoaVoid memStrPointer = NULL;
+	PMoaVoid memoryStringPointer = NULL;
 
 	moa_try
 
 	ThrowNull(cacheInterfacePointer);
 	ThrowNull(xtraEntryDictInterfacePointer);
 
-	// register the Lingo Xtra
-	PIMoaRegistryEntryDict registryEntryDictInterfacePointer = NULL;
-	ThrowErr(cacheInterfacePointer->AddRegistryEntry(xtraEntryDictInterfacePointer, &CLSID_TStdXtra, &IID_IMoaMmXScript, &registryEntryDictInterfacePointer));
-	ThrowNull(registryEntryDictInterfacePointer);
+	{
+		// this interface should NOT be released
+		PIMoaRegistryEntryDict registryEntryDictInterfacePointer = NULL;
+		ThrowErr(cacheInterfacePointer->AddRegistryEntry(xtraEntryDictInterfacePointer, &CLSID_TStdXtra, &IID_IMoaMmXScript, &registryEntryDictInterfacePointer));
+		ThrowNull(registryEntryDictInterfacePointer);
 
-	// register the Method Table
-	const char* VER_MAJORVERSION_STRING = "1";
-	const char* VER_MINORVERSION_STRING = "0";
-	const char* VER_BUGFIXVERSION_STRING = "3";
+		const char* VER_MAJORVERSION_STRING = "1";
+		const char* VER_MINORVERSION_STRING = "0";
+		const char* VER_BUGFIXVERSION_STRING = "3";
 
-	const size_t VERSION_STR_SIZE = 256;
-	char versionStr[VERSION_STR_SIZE] = "";
+		const size_t VERSION_STRING_SIZE = min(256, kMoaMmMaxXtraMessageTable);
+		char versionString[VERSION_STRING_SIZE] = "";
 
-	if (sprintf_s(versionStr, VERSION_STR_SIZE, versionInfo, VER_MAJORVERSION_STRING, VER_MINORVERSION_STRING, VER_BUGFIXVERSION_STRING) == -1) {
-		Throw(kMoaErr_OutOfMem);
+		if (sprintf_s(versionString, VERSION_STRING_SIZE, versionInfo, VER_MAJORVERSION_STRING, VER_MINORVERSION_STRING, VER_BUGFIXVERSION_STRING) == -1) {
+			Throw(kMoaErr_OutOfMem);
+		}
+
+		MoaUlong versionStringSize = stringSizeMax(versionString, VERSION_STRING_SIZE);
+		MoaUlong memoryStringSize = versionStringSize + strnlen_s(msgTable, kMoaMmMaxXtraMessageTable - versionStringSize);
+
+		memoryStringPointer = pObj->pCalloc->NRAlloc(memoryStringSize);
+		ThrowNull(memoryStringPointer);
+
+		if (strncpy_s((char*)memoryStringPointer, memoryStringSize, versionString, versionStringSize)) {
+			Throw(kMoaErr_OutOfMem);
+		}
+
+		if (strcat_s((char*)memoryStringPointer, memoryStringSize, msgTable)) {
+			Throw(kMoaErr_OutOfMem);
+		}
+
+		ThrowErr(registryEntryDictInterfacePointer->Put(kMoaDrDictType_MessageTable, memoryStringPointer, memoryStringSize, kMoaDrDictKey_MessageTable));
 	}
-
-	memStrPointer = pObj->pCalloc->NRAlloc(strlen(versionStr) + stringSize(msgTable));
-	ThrowNull(memStrPointer);
-
-	if (strcpy_s((char*)memStrPointer, stringSize(versionStr), versionStr)) {
-		Throw(kMoaErr_OutOfMem);
-	}
-
-	if (strcat_s((char*)memStrPointer, strlen(versionStr) + stringSize(msgTable), msgTable)) {
-		Throw(kMoaErr_OutOfMem);
-	}
-
-	ThrowErr(registryEntryDictInterfacePointer->Put(kMoaDrDictType_MessageTable, memStrPointer, 0, kMoaDrDictKey_MessageTable));
 
 	moa_catch
 	moa_catch_end
 
 	// always do this, whether there is an error or not
-	if (memStrPointer) {
-		pObj->pCalloc->NRFree(memStrPointer);
-		memStrPointer = NULL;
+	if (memoryStringPointer) {
+		pObj->pCalloc->NRFree(memoryStringPointer);
+		memoryStringPointer = NULL;
 	}
 
 	moa_try_end
