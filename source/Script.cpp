@@ -686,18 +686,23 @@ MoaError TStdXtra_IMoaMmXScript::AccessSpriteMoaProperty(PMoaDrCallInfo callPtr,
 	moa_try_end
 }
 
-MoaError TStdXtra_IMoaMmXScript::TestValueDefault(PMoaMmValue testValuePointer, bool* testValueDefaultPointer) {
+MoaError TStdXtra_IMoaMmXScript::TestValueVoid(PMoaMmValue testValuePointer, bool* testValueVoidPointer) {
 	moa_try
 
 	ThrowNull(testValuePointer);
-	ThrowNull(testValueDefaultPointer);
+	ThrowNull(testValueVoidPointer);
 
 	MoaMmValueType valueType = kMoaMmValueType_Void;
 	ThrowErr(pObj->mmValueInterfacePointer->ValueType(testValuePointer, &valueType));
 
-	*testValueDefaultPointer = valueType == kMoaMmValueType_Void;
+	*testValueVoidPointer = valueType == kMoaMmValueType_Void;
 
 	moa_catch
+
+	if (testValueVoidPointer) {
+		*testValueVoidPointer = true;
+	}
+
 	moa_catch_end
 	moa_try_end
 }
@@ -711,13 +716,14 @@ MoaError TStdXtra_IMoaMmXScript::GetAProp(ConstPMoaMmValue propertyListValuePoin
 	ThrowNull(propertyNameStringPointer);
 	ThrowNull(propertyValuePointer);
 
+	*propertyValuePointer = kVoidMoaMmValueInitializer;
+
 	MoaMmSymbol propertyNameSymbol = 0;
 	ThrowErr(pObj->mmValueInterfacePointer->StringToSymbol(propertyNameStringPointer, &propertyNameSymbol));
 
 	ThrowErr(pObj->mmValueInterfacePointer->SymbolToValue(propertyNameSymbol, &propertyNameValue));
 
 	// if the value isn't found we don't throw, instead the property value is void
-	*propertyValuePointer = kVoidMoaMmValueInitializer;
 	MoaError err = pObj->mmListInterfacePointer->GetValueByProperty(propertyListValuePointer, &propertyNameValue, propertyValuePointer);
 
 	if (err != kMoaErr_NoErr
@@ -753,7 +759,15 @@ MoaError TStdXtra_IMoaMmXScript::GetOptions(PMoaDrCallInfo callPtr, ACCESS_PROPE
 		Throw(kMoaErr_OutOfMem);
 	}
 
-	bool optionsValueDefault = true;
+	if (drMovieInterfacePointerPointer) {
+		*drMovieInterfacePointerPointer = NULL;
+	}
+
+	if (drScoreAccessInterfacePointerPointer) {
+		*drScoreAccessInterfacePointerPointer = NULL;
+	}
+
+	bool optionsValueVoid = true;
 
 	optionsArgumentIndex += accessProperty;
 
@@ -761,19 +775,19 @@ MoaError TStdXtra_IMoaMmXScript::GetOptions(PMoaDrCallInfo callPtr, ACCESS_PROPE
 	if (callPtr->nargs >= optionsArgumentIndex) {
 		// if the optional argument is a property list
 		AccessArgByIndex(optionsArgumentIndex, &argumentValue);
-		ThrowErr(TestValueDefault(&argumentValue, &optionsValueDefault));
+		ThrowErr(TestValueVoid(&argumentValue, &optionsValueVoid));
 	}
 
-	bool movieValueDefault = true;
+	bool movieValueVoid = true;
 
-	if (!optionsValueDefault) {
+	if (!optionsValueVoid) {
 		// first, try and get the #movie property from the options property list
 		// and test it's an integer
 		ThrowErr(GetAProp(&argumentValue, "Movie", &movieValue));
-		ThrowErr(TestValueDefault(&movieValue, &movieValueDefault));
+		ThrowErr(TestValueVoid(&movieValue, &movieValueVoid));
 	}
 
-	if (movieValueDefault) {
+	if (movieValueVoid) {
 		// if the #movie property is void, use the active movie
 		ThrowErr(pObj->drPlayerInterfacePointer->GetActiveMovie(&drMovieInterfacePointer));
 	} else {
@@ -787,18 +801,18 @@ MoaError TStdXtra_IMoaMmXScript::GetOptions(PMoaDrCallInfo callPtr, ACCESS_PROPE
 	ThrowNull(drMovieInterfacePointer);
 
 	if (drScoreAccessInterfacePointerPointer) {
-		bool filmLoopValueDefault = true;
+		bool filmLoopValueVoid = true;
 
-		if (!optionsValueDefault) {
+		if (!optionsValueVoid) {
 			// first, try and get the #filmLoop property from the options property list
 			// and test it's a member
 			ThrowErr(GetAProp(&argumentValue, "FilmLoop", &filmLoopValue));
-			ThrowErr(TestValueDefault(&filmLoopValue, &filmLoopValueDefault));
+			ThrowErr(TestValueVoid(&filmLoopValue, &filmLoopValueVoid));
 		}
 
 		PIMoaDrScoreAccess drScoreAccessInterfacePointer = NULL;
 
-		if (filmLoopValueDefault) {
+		if (filmLoopValueVoid) {
 			// if the #filmLoop property is void, use the score
 			ThrowErr(drMovieInterfacePointer->GetScoreAccess(&drScoreAccessInterfacePointer));
 		} else {
@@ -813,20 +827,20 @@ MoaError TStdXtra_IMoaMmXScript::GetOptions(PMoaDrCallInfo callPtr, ACCESS_PROPE
 
 		ThrowNull(drScoreAccessInterfacePointer);
 
-		bool frameValueDefault = true;
+		bool frameValueVoid = true;
 
-		if (!optionsValueDefault) {
+		if (!optionsValueVoid) {
 			// first, try and get the #frame property from the options property list
 			// and test it's an integer
 			ThrowErr(GetAProp(&argumentValue, "Frame", &frameValue));
-			ThrowErr(TestValueDefault(&frameValue, &frameValueDefault));
+			ThrowErr(TestValueVoid(&frameValue, &frameValueVoid));
 		}
 
 		MoaLong frameIndex = 0;
 
-		if (frameValueDefault) {
+		if (frameValueVoid) {
 			// if the #frame property is void
-			if (filmLoopValueDefault) {
+			if (filmLoopValueVoid) {
 				// for the score, default to the frame property of the movie
 				MoaMmSymbol frameSymbol = 0;
 				ThrowErr(pObj->mmValueInterfacePointer->StringToSymbol("Frame", &frameSymbol));
@@ -895,6 +909,19 @@ MoaError TStdXtra_IMoaMmXScript::GetChannelMoaPropertyArguments(PMoaDrCallInfo c
 	ThrowNull(*drScoreAccessInterfacePointerPointer);
 
 	moa_catch
+
+	if (channelIndexPointer) {
+		*channelIndexPointer = 0;
+	}
+
+	if (nameSymbolPointer) {
+		*nameSymbolPointer = 0;
+	}
+
+	if (drScoreAccessInterfacePointerPointer) {
+		*drScoreAccessInterfacePointerPointer = NULL;
+	}
+
 	moa_catch_end
 	moa_try_end
 }
