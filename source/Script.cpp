@@ -869,8 +869,10 @@ MoaError TStdXtra_IMoaMmXScript::GetOptions(PMoaDrCallInfo callPtr, ACCESS_PROPE
 	if (drMovieInterfacePointerPointer) {
 		*drMovieInterfacePointerPointer = drMovieInterfacePointer;
 	} else {
-		drMovieInterfacePointer->Release();
-		drMovieInterfacePointer = NULL;
+		if (drMovieInterfacePointer) {
+			drMovieInterfacePointer->Release();
+			drMovieInterfacePointer = NULL;
+		}
 	}
 
 	if (filmLoopCastMemInterfacePointer) {
