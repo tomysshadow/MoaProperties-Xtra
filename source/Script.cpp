@@ -229,7 +229,7 @@ STDMETHODIMP TStdXtra_IMoaRegister::Register(PIMoaCache cacheInterfacePointer, P
 
 		const char* VER_MAJORVERSION_STRING = "1";
 		const char* VER_MINORVERSION_STRING = "0";
-		const char* VER_BUGFIXVERSION_STRING = "3";
+		const char* VER_BUGFIXVERSION_STRING = "4";
 
 		const size_t VERSION_STRING_SIZE = min(256, kMoaMmMaxXtraMessageTable);
 		char versionString[VERSION_STRING_SIZE] = "";
@@ -743,6 +743,7 @@ MoaError TStdXtra_IMoaMmXScript::GetOptions(PMoaDrCallInfo callPtr, ACCESS_PROPE
 	PIMoaDrMovie* drMovieInterfacePointerPointer,
 	PIMoaDrScoreAccess* drScoreAccessInterfacePointerPointer) {
 	PIMoaDrMovie drMovieInterfacePointer = NULL;
+	PIMoaDrScoreAccess drScoreAccessInterfacePointer = NULL;
 	PIMoaDrCastMem filmLoopCastMemInterfacePointer = NULL;
 
 	MoaMmValue argumentValue = kVoidMoaMmValueInitializer;
@@ -756,15 +757,7 @@ MoaError TStdXtra_IMoaMmXScript::GetOptions(PMoaDrCallInfo callPtr, ACCESS_PROPE
 
 	// one or the other can be NULL, but not both
 	if (!drMovieInterfacePointerPointer && !drScoreAccessInterfacePointerPointer) {
-		Throw(kMoaErr_OutOfMem);
-	}
-
-	if (drMovieInterfacePointerPointer) {
-		*drMovieInterfacePointerPointer = NULL;
-	}
-
-	if (drScoreAccessInterfacePointerPointer) {
-		*drScoreAccessInterfacePointerPointer = NULL;
+		Throw(kMoaErr_BadParam);
 	}
 
 	bool optionsValueVoid = true;
@@ -809,8 +802,6 @@ MoaError TStdXtra_IMoaMmXScript::GetOptions(PMoaDrCallInfo callPtr, ACCESS_PROPE
 			ThrowErr(GetAProp(&argumentValue, "FilmLoop", &filmLoopValue));
 			ThrowErr(TestValueVoid(&filmLoopValue, &filmLoopValueVoid, kMoaMmValueType_Void));
 		}
-
-		PIMoaDrScoreAccess drScoreAccessInterfacePointer = NULL;
 
 		if (filmLoopValueVoid) {
 			// if the #filmLoop property is void, use the score
@@ -859,8 +850,6 @@ MoaError TStdXtra_IMoaMmXScript::GetOptions(PMoaDrCallInfo callPtr, ACCESS_PROPE
 
 		// the frame is not set by default, so we must always explicitly specify it
 		ThrowErr(drScoreAccessInterfacePointer->SetCurFrameIndex(frameIndex));
-
-		*drScoreAccessInterfacePointerPointer = drScoreAccessInterfacePointer;
 	}
 
 	moa_catch
@@ -872,6 +861,15 @@ MoaError TStdXtra_IMoaMmXScript::GetOptions(PMoaDrCallInfo callPtr, ACCESS_PROPE
 		if (drMovieInterfacePointer) {
 			drMovieInterfacePointer->Release();
 			drMovieInterfacePointer = NULL;
+		}
+	}
+
+	if (drScoreAccessInterfacePointerPointer) {
+		*drScoreAccessInterfacePointerPointer = drScoreAccessInterfacePointer;
+	} else {
+		if (drScoreAccessInterfacePointer) {
+			drScoreAccessInterfacePointer->Release();
+			drScoreAccessInterfacePointer = NULL;
 		}
 	}
 
@@ -899,31 +897,14 @@ MoaError TStdXtra_IMoaMmXScript::GetChannelMoaPropertyArguments(PMoaDrCallInfo c
 
 	// get the arguments for methods that take in a channel index
 	AccessArgByIndex(1, &argumentValue);
-
 	ThrowErr(pObj->mmValueInterfacePointer->ValueToInteger(&argumentValue, channelIndexPointer));
 
 	AccessArgByIndex(2, &argumentValue);
-
-	MoaMmSymbol nameSymbol = 0;
 	ThrowErr(pObj->mmValueInterfacePointer->ValueToSymbol(&argumentValue, nameSymbolPointer));
 
 	ThrowErr(GetOptions(callPtr, accessProperty, 3, NULL, drScoreAccessInterfacePointerPointer));
-	ThrowNull(*drScoreAccessInterfacePointerPointer);
 
 	moa_catch
-
-	if (channelIndexPointer) {
-		*channelIndexPointer = 0;
-	}
-
-	if (nameSymbolPointer) {
-		*nameSymbolPointer = 0;
-	}
-
-	if (drScoreAccessInterfacePointerPointer) {
-		*drScoreAccessInterfacePointerPointer = NULL;
-	}
-
 	moa_catch_end
 	moa_try_end
 }
