@@ -47,10 +47,10 @@ Usage
 		-- get the name of Movie 2
 		set movieName to getMovieMoaProperty(#name, [#movie: 2])
 
-		-- set the preloadMode of Cast Library 3 to 2 (after first frame)
+		-- set the preloadMode of Cast Library 3 to 2 (Before Frame One)
 		setCastLibMoaProperty(castLib(3), #preloadMode, 2)
 
-		-- set the purgePriority of Member 10 to 0 (never)
+		-- set the purgePriority of Member 10 to 0 (Never)
 		setMemberMoaProperty(member(10), #purgePriority, 0)
 
 		-- set the loaded of Member 20 of Cast Library 4 of Movie 5 to 0 (unload the cast member)
