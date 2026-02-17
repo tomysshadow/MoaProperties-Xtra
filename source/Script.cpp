@@ -224,17 +224,25 @@ STDMETHODIMP TStdXtra_IMoaRegister::Register(PIMoaCache cacheInterfacePointer, P
 	{
 		// this interface should NOT be released
 		PIMoaRegistryEntryDict registryEntryDictInterfacePointer = NULL;
-		ThrowErr(cacheInterfacePointer->AddRegistryEntry(xtraEntryDictInterfacePointer, &CLSID_TStdXtra, &IID_IMoaMmXScript, &registryEntryDictInterfacePointer));
+
+		ThrowErr(cacheInterfacePointer->AddRegistryEntry(
+			xtraEntryDictInterfacePointer,
+			&CLSID_TStdXtra,
+			&IID_IMoaMmXScript,
+			&registryEntryDictInterfacePointer
+		));
+		
 		ThrowNull(registryEntryDictInterfacePointer);
 
 		const char* VER_MAJORVERSION_STRING = "1";
 		const char* VER_MINORVERSION_STRING = "0";
-		const char* VER_BUGFIXVERSION_STRING = "4";
+		const char* VER_BUGFIXVERSION_STRING = "5";
 
 		const size_t VERSION_STRING_SIZE = min(256, kMoaMmMaxXtraMessageTable);
 		char versionString[VERSION_STRING_SIZE] = "";
 
-		if (sprintf_s(versionString, VERSION_STRING_SIZE, versionInfo, VER_MAJORVERSION_STRING, VER_MINORVERSION_STRING, VER_BUGFIXVERSION_STRING) == -1) {
+		if (sprintf_s(versionString, VERSION_STRING_SIZE, versionInfo,
+			VER_MAJORVERSION_STRING, VER_MINORVERSION_STRING, VER_BUGFIXVERSION_STRING) == -1) {
 			Throw(kMoaErr_OutOfMem);
 		}
 
@@ -252,7 +260,12 @@ STDMETHODIMP TStdXtra_IMoaRegister::Register(PIMoaCache cacheInterfacePointer, P
 			Throw(kMoaErr_OutOfMem);
 		}
 
-		ThrowErr(registryEntryDictInterfacePointer->Put(kMoaDrDictType_MessageTable, memoryStringPointer, memoryStringSize, kMoaDrDictKey_MessageTable));
+		ThrowErr(registryEntryDictInterfacePointer->Put(
+			kMoaDrDictType_MessageTable,
+			memoryStringPointer,
+			(MoaLong)memoryStringSize,
+			kMoaDrDictKey_MessageTable
+		));
 	}
 
 	moa_catch

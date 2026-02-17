@@ -14,7 +14,7 @@ written permission of Adobe.
 #ifndef _H_Script
 #define _H_Script
 
-#include "shared.h"
+#include "utils.h"
 
 #include "moastdif.h"
 #include "mmixscrp.h"

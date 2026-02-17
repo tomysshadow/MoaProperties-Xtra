@@ -147,7 +147,7 @@
   <ItemGroup>
     <ClInclude Include="..\source\resource.h" />
     <ClInclude Include="..\source\Script.h" />
-    <ClInclude Include="..\source\shared.h" />
+    <ClInclude Include="..\source\utils.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\README.txt" />

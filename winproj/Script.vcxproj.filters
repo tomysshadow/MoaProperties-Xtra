@@ -28,7 +28,7 @@
     <ClInclude Include="..\source\Script.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\source\shared.h">
+    <ClInclude Include="..\source\utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\source\resource.h">
