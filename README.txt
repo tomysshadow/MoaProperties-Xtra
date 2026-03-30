@@ -1,4 +1,4 @@
-MoaProperties Xtra 1.0.5
+MoaProperties Xtra 1.0.6
 By Anthony Kleine
 
 	This Director Xtra exposes MOA Properties to Lingo.

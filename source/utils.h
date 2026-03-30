@@ -1,4 +1,5 @@
 #pragma once
+#include <stddef.h>
 #include <string.h>
 
 inline bool stringNullOrEmpty(const char* str) {
